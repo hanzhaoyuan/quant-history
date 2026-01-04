@@ -11,14 +11,23 @@ REM Save current directory and change to project root
 set SCRIPT_DIR=%~dp0
 cd /d "%SCRIPT_DIR%\.."
 
-REM Check if conda environment is activated
-where conda >nul 2>nul
-if %errorlevel% neq 0 (
-    echo ERROR: conda not found in PATH
-    echo Please install Anaconda/Miniconda or ensure it's in your PATH
-    exit /b 1
+REM Set Visual Studio environment (custom location)
+echo Setting up Visual Studio environment...
+if exist "D:\Program Files\Microsoft Visual Studio\18\Community\Common7\Tools\VsDevCmd.bat" (
+    call "D:\Program Files\Microsoft Visual Studio\18\Community\Common7\Tools\VsDevCmd.bat" -arch=x64 >nul
+    echo Visual Studio 2026 environment loaded
+) else (
+    echo WARNING: Visual Studio not found at custom location
+    echo Trying to find VS in standard locations...
+    where cl >nul 2>nul
+    if %errorlevel% neq 0 (
+        echo ERROR: No C++ compiler found
+        echo Please ensure Visual Studio is installed
+        exit /b 1
+    )
 )
 
+echo.
 echo Step 1: Creating/updating conda environment...
 call conda env create -f environment.yml 2>nul
 if %errorlevel% neq 0 (
@@ -39,21 +48,18 @@ echo Step 3: Building C++ Core with pybind11...
 if not exist build mkdir build
 cd build
 
-REM Detect Visual Studio version
-cmake .. -G "Visual Studio 17 2022" -A x64 >nul 2>nul
+REM Use Ninja generator (works with VS command prompt environment)
+echo Running CMake configuration with Ninja...
+cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
 if %errorlevel% neq 0 (
-    echo Visual Studio 2022 not found, trying 2019...
-    cmake .. -G "Visual Studio 16 2019" -A x64
-    if %errorlevel% neq 0 (
-        echo ERROR: No compatible Visual Studio found
-        echo Please install Visual Studio 2019 or 2022 with C++ tools
-        cd ..
-        exit /b 1
-    )
+    echo ERROR: CMake configuration failed
+    echo Make sure Ninja is installed: conda install ninja
+    cd ..
+    exit /b 1
 )
 
-echo Building Release configuration...
-cmake --build . --config Release
+echo Building with Ninja...
+cmake --build .
 if %errorlevel% neq 0 (
     echo ERROR: C++ build failed
     cd ..
@@ -64,12 +70,11 @@ cd ..
 
 echo.
 echo Step 4: Copying pybind11 extension to project root...
-if exist build\Release\_cpp_history_core.*.pyd (
-    copy build\Release\_cpp_history_core.*.pyd . >nul
-) else if exist build\_cpp_history_core.*.pyd (
+if exist build\_cpp_history_core.*.pyd (
     copy build\_cpp_history_core.*.pyd . >nul
+    echo pybind11 extension copied
 ) else (
-    echo WARNING: pybind11 extension not found in expected location
+    echo WARNING: pybind11 extension not found
 )
 
 echo.

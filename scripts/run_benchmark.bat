@@ -10,7 +10,7 @@ set SCRIPT_DIR=%~dp0
 cd /d "%SCRIPT_DIR%\.."
 
 REM Activate conda environment
-call conda activate quant-history
+call conda.bat activate quant-history
 if %errorlevel% neq 0 (
     echo ERROR: Failed to activate quant-history environment
     echo Please run scripts\build.bat first
