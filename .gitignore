@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+*.egg-info/
+dist/
+build/
+*.egg
+
+# C++
+*.o
+*.obj
+*.lib
+*.dll
+*.exe
+*.out
+*.exp
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+install_manifest.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Benchmark 输出
+benchmark_results.json
+*.log
+
+# Cython 生成文件
+*.c
+*.cpp.bak
+providers/*.cpp
+bindings/cython/*.cpp
+
+# Build artifacts
+_cpp_history_core.*.pyd
+_cpp_history_core.*.so
