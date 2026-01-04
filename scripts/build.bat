@@ -7,6 +7,10 @@ echo Building quant-history benchmark project
 echo ========================================
 echo.
 
+REM Save current directory and change to project root
+set SCRIPT_DIR=%~dp0
+cd /d "%SCRIPT_DIR%\.."
+
 REM Check if conda environment is activated
 where conda >nul 2>nul
 if %errorlevel% neq 0 (
