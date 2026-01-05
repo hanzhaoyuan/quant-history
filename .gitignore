@@ -41,3 +41,5 @@ bindings/cython/*.cpp
 # Build artifacts
 _cpp_history_core.*.pyd
 _cpp_history_core.*.so
+
+.claude

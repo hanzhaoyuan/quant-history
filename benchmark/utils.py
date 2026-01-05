@@ -67,7 +67,7 @@ def benchmark_function(
 def format_time(ms: float) -> str:
     """Format time in milliseconds to human-readable string"""
     if ms < 1:
-        return f"{ms*1000:.2f} µs"
+        return f"{ms*1000:.2f} us"  # Changed from µs to us for Windows compatibility
     elif ms < 1000:
         return f"{ms:.2f} ms"
     else:

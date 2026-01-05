@@ -28,7 +28,7 @@ void MarketDataCache::initialize(const std::string& symbol) {
     int trading_days = 0;
     while (trading_days < 100) {
         if (is_trading_day(year, month, day)) {
-            // Calculate timestamp for this date at 00:00:00 UTC+8
+            // Calculate timestamp for this date at 00:00:00 local time
             std::tm tm_date = {};
             tm_date.tm_year = year - 1900;
             tm_date.tm_mon = month - 1;
@@ -37,10 +37,9 @@ void MarketDataCache::initialize(const std::string& symbol) {
             tm_date.tm_min = 0;
             tm_date.tm_sec = 0;
 
-            // Convert to timestamp (assuming UTC, then adjust for UTC+8)
+            // Convert to timestamp (local time, assumed to be UTC+8)
+            // mktime returns local time timestamp, which is what we want
             int64_t date_ts = std::mktime(&tm_date);
-            // Adjust for UTC+8 (subtract 8 hours to get UTC equivalent)
-            date_ts -= 8 * 3600;
 
             auto day_bars = generate_trading_day(symbol, date_ts, seed);
             bars.insert(bars.end(), day_bars.begin(), day_bars.end());
@@ -149,10 +148,13 @@ bool MarketDataCache::is_trading_day(int year, int month, int day) const {
 }
 
 uint32_t MarketDataCache::get_seed_from_symbol(const std::string& symbol) const {
-    // Use std::hash for deterministic seed generation
-    std::hash<std::string> hasher;
-    size_t hash_value = hasher(symbol);
-    return static_cast<uint32_t>(hash_value & 0xFFFFFFFF);
+    // Simple deterministic hash (same as Python: sum of char codes * 31)
+    // This matches Python's simple hash implementation
+    uint32_t hash = 0;
+    for (unsigned char c : symbol) {
+        hash = hash * 31 + c;
+    }
+    return hash;
 }
 
 double MarketDataCache::random_double(uint32_t& seed, double min, double max) {

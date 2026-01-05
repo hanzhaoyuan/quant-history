@@ -14,9 +14,11 @@ class PythonHistoryProvider:
         self.cache = {}  # {symbol: list[dict]}
 
     def _get_seed_from_symbol(self, symbol: str) -> int:
-        """Get deterministic seed from symbol using MD5"""
-        hash_bytes = hashlib.md5(symbol.encode()).digest()
-        return int.from_bytes(hash_bytes[:4], 'little')
+        """Get deterministic seed from symbol using simple hash (matches C++)"""
+        hash_val = 0
+        for c in symbol:
+            hash_val = (hash_val * 31 + ord(c)) & 0xFFFFFFFF
+        return hash_val
 
     def _lcg_random(self, seed_state: list, min_val: float, max_val: float) -> float:
         """Linear Congruential Generator (same as C++)"""
